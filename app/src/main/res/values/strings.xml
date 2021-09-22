@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Hello</string>
+    <string name="id_name">input id</string>
+    <string name="psd_name">password</string>
+    <string name="remember_psd">remember pwd</string>
+    <string name="find_psd">find pwd</string>
+    <string name="login">login</string>
+</resources>
