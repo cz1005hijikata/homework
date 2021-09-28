@@ -2,7 +2,9 @@ package com.swufe.hello;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -34,6 +36,8 @@ public class ConfigActivity extends AppCompatActivity implements View.OnClickLis
         float newEuro=Float.parseFloat(euroText.getText().toString());
         float newWon=Float.parseFloat(wonText.getText().toString());
 
+        saveToSP(newDollar, newEuro, newWon);
+
         //获取当前对象
         Intent first=getIntent();
 
@@ -50,5 +54,14 @@ public class ConfigActivity extends AppCompatActivity implements View.OnClickLis
 
         //结束当前窗口，不会不断产生新的窗口
         finish();
+    }
+
+    private void saveToSP(float newDollar, float newEuro, float newWon) {
+        SharedPreferences sp=getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor=sp.edit();
+        editor.putFloat("dollar_rate", newDollar);
+        editor.putFloat("euro_rate", newEuro);
+        editor.putFloat("won_rate", newWon);
+        editor.apply();
     }
 }
