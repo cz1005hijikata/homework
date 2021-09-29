@@ -40,7 +40,6 @@ public class ConfigActivity extends AppCompatActivity implements View.OnClickLis
 
         //获取当前对象
         Intent first=getIntent();
-
         Bundle bdl=new Bundle();
         bdl.putFloat("dollar_key3",newDollar);
         bdl.putFloat("euro_key3",newEuro);

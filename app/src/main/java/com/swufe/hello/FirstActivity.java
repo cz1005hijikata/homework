@@ -20,6 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,9 +54,15 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
             public void handleMessage(@NonNull Message msg) {
                 Log.i(TAG, "handleMessage:收到消息");
                 if (msg.what == 6) {
-                    String str = (String) msg.obj;
-                    Log.i(TAG, "handleMessage: getMessage msg=" + str);
-                    result.setText(str);
+                    //String str = (String) msg.obj;
+                    //Log.i(TAG, "handleMessage: getMessage msg=" + str);
+                    //result.setText(str);
+                    Bundle bdl =(Bundle)msg.obj;
+                    dollar_rate=bdl.getFloat("key_dollar");
+                    euro_rate=bdl.getFloat("key_euro");
+                    won_rate=bdl.getFloat("key_won");
+                    Toast.makeText(FirstActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
+                    //更新
                 }
                 super.handleMessage(msg);
             }
@@ -109,7 +120,6 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
         //区分哪个窗口带回的数据
         //区分多个窗口带回数据的格式
         if (requestCode == 1 && resultCode == 3) {
-
             dollar_rate = data.getFloatExtra("dollar_key2", 0.1f);
             euro_rate = data.getFloatExtra("euro_key2", 0.1f);
             won_rate = data.getFloatExtra("won_key2", 0.1f);
@@ -141,6 +151,7 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
         return super.onOptionsItemSelected(item);
     }
 
+    //安卓不允许主线程中存在，时间开销不确定的部分
     public void run() {
         Log.i(TAG, "run:run……");
         //延迟
@@ -150,22 +161,66 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
             e.printStackTrace();
         }
         //获取网络数据
-        URL url = null;
+//        URL url = null;
+//        try {
+//            url = new URL("http://www.usd-cny.com/icbc.htm");
+//            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+//            InputStream in = http.getInputStream();
+//            String html = inputStream2String(in);
+//            Log.i(TAG, "run: html=" + html);
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        Bundle bdl=new Bundle();
+        //提取汇率内容
         try {
-            url = new URL("http://www.usd-cny.com/icbc.htm");
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            InputStream in = http.getInputStream();
-            String html = inputStream2String(in);
-            Log.i(TAG, "run: html=" + html);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Document doc = Jsoup.connect("http://www.usd-cny.com/").get();
+            Log.i(TAG, "run: title=" + doc.title());
+            //Elements tables=doc.getElementsByTag("table");//分析结构，考虑获取数据方式
+            //Element firstTable=tables.first();
+            Element firstTable=doc.getElementsByTag("table").first();
+            //Log.i(TAG, "run: table=" + firstTable);//验证能找到table
+//            for(Element item:firstTable.getElementsByTag("bz")){
+//                Log.i(TAG, "run: item=" + item.text());
+//            }
+            Elements trs=firstTable.getElementsByTag("tr");//获取行
+            trs.remove(0);//去掉第一行数据
+            for(Element tr: trs){//获取元素
+                Log.i(TAG, "run: r=" + tr);
+                Elements tds=tr.getElementsByTag("td");
+                //Log.i(TAG, "run: tds.count=" + tds.size());
+                //tds.size=0,过滤掉title
+                Element td1=tds.get(0);//第一列
+                Element td2=tds.get(4);//最后一列
+                Log.i(TAG, "run: td1=" + td1+"\t td2=" + td2);
+                //带回一组消息
+                if("美元".equals(td1.text())){//通常常量放前面
+                    bdl.putFloat("key_dollar",100/Float.parseFloat(td2.text()));
+                }else if("欧元".equals(td1.text())){
+                    bdl.putFloat("key_euro",100/Float.parseFloat(td2.text()));
+                }else if("韩币".equals(td1.text())){
+                    bdl.putFloat("key_won",100/Float.parseFloat(td2.text()));
+                }
+            }
+//            Elements ths=firstTable.getElementsByTag("th");
+//            for(Element th: ths){
+//                Log.i(TAG, "run: th=" + th);
+//                Log.i(TAG, "run: th.html=" + th.html());//获取元素
+//                Log.i(TAG, "run: th.text=" + th.text());//只保留文本
+//            }
+//            Element th2=ths.get(1);
+//            Log.i(TAG, "run: th2=" + th2);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         //发送消息
         Message msg = handler.obtainMessage(6);
         //msg.what=6;
-        msg.obj = "run";
+        msg.obj = bdl;
         handler.sendMessage(msg);
     }
 
@@ -182,6 +237,8 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
         }
         return out.toString();
     }
+
+
 }
 
 

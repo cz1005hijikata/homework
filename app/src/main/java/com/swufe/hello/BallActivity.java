@@ -1,8 +1,10 @@
 package com.swufe.hello;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -53,6 +55,21 @@ public class BallActivity extends AppCompatActivity implements View.OnClickListe
             score2=0;
             score1=0;
         }
+        showScore();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("score1",score1);
+        outState.putInt("score2",score2);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        score1=savedInstanceState.getInt("score1",0);
+        score2=savedInstanceState.getInt("score2",0);
         showScore();
     }
 }
