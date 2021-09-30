@@ -58,11 +58,25 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
                     //Log.i(TAG, "handleMessage: getMessage msg=" + str);
                     //result.setText(str);
                     Bundle bdl =(Bundle)msg.obj;
-                    dollar_rate=bdl.getFloat("key_dollar");
-                    euro_rate=bdl.getFloat("key_euro");
-                    won_rate=bdl.getFloat("key_won");
-                    Toast.makeText(FirstActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
-                    //更新
+
+                    //判断当天是否已更新汇率
+                    SharedPreferences sp=getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+                    String time1=sp.getString("time","0000-00-00");
+                    //String time1="0000-00-00";
+                    String time2=bdl.get("time").toString().substring(7,16);
+                    Log.i(TAG,"run: time1=" +time1+"\t time2="+time2);
+                    if(!time1.equals(time2)){
+                        SharedPreferences.Editor editor=sp.edit();
+                        editor.putString("time",time2);
+                        editor.putFloat("dollar_rate", bdl.getFloat("key_dollar"));
+                        editor.putFloat("euro_rate", bdl.getFloat("key_euro"));
+                        editor.putFloat("won_rate", bdl.getFloat("key_won"));
+                        editor.apply();
+                        Log.i(TAG,"run: 更新汇率");
+                        Toast.makeText(FirstActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Log.i(TAG,"run: 当天已更新,不再更新");
+                    }
                 }
                 super.handleMessage(msg);
             }
@@ -186,6 +200,16 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
 //            for(Element item:firstTable.getElementsByTag("bz")){
 //                Log.i(TAG, "run: item=" + item.text());
 //            }
+
+            //获取时间装入bundle
+            Elements ps=doc.getElementsByTag("p");
+//            for(Element p:ps){
+//                Log.i(TAG, "run: time=" + p.text());
+//            }
+            Element p=ps.get(0);
+            bdl.putString("time",p.text());
+            Log.i(TAG,"run: time= "+p.text());
+
             Elements trs=firstTable.getElementsByTag("tr");//获取行
             trs.remove(0);//去掉第一行数据
             for(Element tr: trs){//获取元素
