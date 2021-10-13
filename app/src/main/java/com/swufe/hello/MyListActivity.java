@@ -57,6 +57,7 @@ public class MyListActivity extends ListActivity{
         rtask.setHandler(handler);
         Thread t = new Thread(rtask);
         t.start();
+
     }
 
 }

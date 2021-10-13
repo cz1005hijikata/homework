@@ -13,6 +13,18 @@
         android:theme="@style/Theme.Hello"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Ratelist3Activity"
+            android:exported="true" />
+        <activity
+            android:name=".RateList2Activity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".RateListActivity"
             android:exported="true">
             <intent-filter>
