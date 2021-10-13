@@ -82,6 +82,9 @@ public class FirstActivity extends AppCompatActivity implements Runnable {
             }
         };
         //启动线程
+        MyTask task=new MyTask();
+        task.setHandler(handler);
+
         Thread thread = new Thread(this);
         thread.start();//这里执行run方法
     }
